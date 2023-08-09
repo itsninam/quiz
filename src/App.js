@@ -1,18 +1,22 @@
 import "./App.css";
 import Header from "./Header";
 import Main from "./Main";
+import Loader from "./Loader";
+import Error from "./Error";
 import { useEffect, useReducer } from "react";
+import Welcome from "./Welcome";
 
 const initialState = {
   questions: [],
   status: "loading",
 };
+
 const reducer = (state, action) => {
   switch (action.type) {
     case "dataReceived":
       return {
         ...state,
-        question: action.payload,
+        questions: action.payload,
         status: "ready",
       };
     case "dataFailed":
@@ -26,7 +30,9 @@ const reducer = (state, action) => {
 };
 
 function App() {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [{ questions, status }, dispatch] = useReducer(reducer, initialState);
+
+  const numQuestions = questions.length;
 
   useEffect(() => {
     fetch("http://localhost:8000/questions")
@@ -39,8 +45,9 @@ function App() {
     <div className="app">
       <Header />
       <Main>
-        <p>1/2</p>
-        <p>Questions</p>
+        {status === "loading" && <Loader />}
+        {status === "error" && <Error />}
+        {status === "ready" && <Welcome numQuestions={numQuestions} />}
       </Main>
     </div>
   );
